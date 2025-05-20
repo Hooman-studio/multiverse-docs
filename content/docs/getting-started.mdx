@@ -1,0 +1,81 @@
+---
+title: Getting Started
+description: Learn how to get started with Multiverse Docs
+---
+
+# Getting Started with Multiverse Docs
+
+This guide will help you get started with Multiverse Docs, a modern documentation website built with Next.js and MDX.
+
+## Installation
+
+To create a new Multiverse Docs site, run the following command:
+
+\`\`\`bash
+npx create-next-app@latest my-docs --use-npm
+cd my-docs
+npm install @next/mdx @mdx-js/loader @mdx-js/react
+\`\`\`
+
+## Configuration
+
+First, create a `next.config.mjs` file in the root of your project:
+
+\`\`\`js
+import createMDX from '@next/mdx'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+}
+
+const withMDX = createMDX({
+  // Add markdown plugins here, as desired
+})
+
+export default withMDX(nextConfig)
+\`\`\`
+
+Then, create an `mdx-components.tsx` file in the root of your project:
+
+\`\`\`tsx
+import type { MDXComponents } from 'mdx/types'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    ...components,
+  }
+}
+\`\`\`
+
+## Creating Content
+
+Create a `content` directory in the root of your project. This is where you'll store your MDX files.
+
+\`\`\`
+my-docs/
+├── content/
+│   └── docs/
+│       ├── index.mdx
+│       └── getting-started.mdx
+\`\`\`
+
+## Running the Development Server
+
+To start the development server, run:
+
+\`\`\`bash
+npm run dev
+\`\`\`
+
+Visit [http://localhost:3000](http://localhost:3000) to see your documentation site.
+
+## Next Steps
+
+Now that you have a basic Multiverse Docs site up and running, you can:
+
+- Customize the theme
+- Add more content
+- Configure the sidebar
+- Add search functionality
+\`\`\`

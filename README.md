@@ -1,30 +1,40 @@
-# Multiverse Docs
+# Updating Content in Multiverse Docs
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+This repository uses MDX files for its documentation pages. To update the content, follow these steps:
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/hooman-studio-team/v0-multiverse-docs)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/3QSJmQZtEZI)
+## 1. Locate the MDX Files
 
-## Overview
+- All documentation content should be stored in the `/content` folder or in a direct subfolder, such as `/content/example`.
+- **Note:** Do not use multiple sublayers (e.g., `/content/example/foo`). Only one level of subfolders is supported.
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## 2. Edit an Existing Page
 
-## Deployment
+- Open the `.mdx` file you want to update in your code editor.
+- Make your changes using Markdown and JSX as needed.
+- Save the file.
 
-Your project is live at:
+## 3. Add a New Page
 
-**[https://vercel.com/hooman-studio-team/v0-multiverse-docs](https://vercel.com/hooman-studio-team/v0-multiverse-docs)**
+- Create a new file with the `.mdx` extension in the `/content` folder or a direct subfolder.
+- Add your content using Markdown and JSX.
+- Save the file.
 
-## Build your app
+## 4. Preview Your Changes (Optional)
 
-Continue building your app on:
+- If you have a local development environment set up, **always use `pnpm`** to run commands.
+- Start the development server: `pnpm dev`
+- Visit the local site in your browser to preview your updates.
 
-**[https://v0.dev/chat/projects/3QSJmQZtEZI](https://v0.dev/chat/projects/3QSJmQZtEZI)**
+## 5. Commit and Push
 
-## How It Works
+- Stage your changes: `git add .`
+- Commit your changes: `git commit -m "Update docs content"`
+- Push to the repository: `git push`
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## 6. Deployment
+
+- Once changes are pushed, the site will be automatically redeployed (e.g., via Vercel) and your updates will go live.
+
+---
+
+**Tip:** Use clear commit messages and review your changes before pushing to keep the documentation organized and up to date.

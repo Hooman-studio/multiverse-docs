@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import SidebarServer from "@/components/sidebar-server";
+import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,10 +27,11 @@ export default function RootLayout({
           enableSystem={false}
           forcedTheme="dark"
         >
+          <Header />
           <div className="flex min-h-screen">
             <SidebarServer />
             <main className="flex-1 overflow-y-auto">
-              <div className="container max-w-4xl py-6 px-4 md:py-12 md:px-8">
+              <div className="container max-w-screen-lg py-6 px-4 pt-16 md:pt-24 md:py-12 md:px-12">
                 {children}
               </div>
             </main>

@@ -3,9 +3,9 @@ import { getMDXPage, getAllMDXPages } from "@/lib/mdx";
 import type { Metadata } from "next";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug?: string[];
-  };
+  }>;
 }
 
 export async function generateMetadata({

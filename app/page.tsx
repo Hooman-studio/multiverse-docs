@@ -17,12 +17,9 @@ export default function Home() {
           />
         </div>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-          Documentation
+          Multiverse Computing
         </h1>
-        <p className="text-xl text-gray-5">
-          A modern documentation website with MDX support and syntax
-          highlighting.
-        </p>
+        <p className="text-xl text-gray-5"></p>
       </div>
       <div className="flex gap-4">
         <Button
@@ -34,14 +31,12 @@ export default function Home() {
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="https://github.com/yourusername/multiverse-docs">
-            GitHub
-          </Link>
+          <Link href="https://multiversecomputing.com">Website</Link>
         </Button>
       </div>
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      {/* <div className="mt-8 grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border border-gray-11 p-6">
-          <h3 className="mb-2 text-xl font-medium">MDX Support</h3>
+          <h3 className="mb-2 text-xl font-medium">L</h3>
           <p className="text-gray-5">
             Write your documentation in Markdown with JSX components.
           </p>
@@ -65,7 +60,7 @@ export default function Home() {
             Looks great on all devices, from mobile to desktop.
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

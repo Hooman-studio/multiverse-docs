@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { addBasePath } from "next/dist/client/add-base-path";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./ui/command";
+import { Button } from "./ui/button";
 
 // Type for Pagefind result
 interface PagefindResult {
@@ -24,6 +24,46 @@ interface PagefindResult {
 const DEV_SEARCH_NOTICE =
   "Search isn't available in development. Run `next build` and `next start` to test search.";
 
+// Extend Window interface for pagefind
+declare global {
+  interface Window {
+    pagefind: any;
+  }
+}
+
+// Helper to load pagefind.js from public folder
+const loadPagefindScript = () => {
+  return new Promise<void>((resolve, reject) => {
+    if ((window as any).Pagefind) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "pagefind-script";
+    script.src = "/_pagefind/pagefind.js";
+    script.type = "module";
+    script.async = true;
+    script.onload = async () => {
+      console.log("Pagefind window: ", (window as any).Pagefind);
+      await (window as any).Pagefind.options({ baseUrl: "/" });
+      resolve();
+    };
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+};
+
+export async function importPagefind() {
+  window.pagefind = await import(
+    // @ts-ignore: webpackIgnore is intentional for runtime import and no type declarations exist
+    /* webpackIgnore: true */ "/_pagefind/pagefind.js"
+  );
+  await window.pagefind.options({
+    baseUrl: "/",
+    // ... more search options
+  });
+}
+
 export function SearchInput({ className }: { className?: string }) {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<PagefindResult[]>([]);
@@ -36,14 +76,6 @@ export function SearchInput({ className }: { className?: string }) {
   // Keyboard shortcut: focus input on / or Cmd+K/Ctrl+K
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      const el = document.activeElement;
-      if (
-        !el ||
-        ["INPUT", "SELECT", "BUTTON", "TEXTAREA"].includes(el.tagName) ||
-        (el as HTMLElement).isContentEditable
-      ) {
-        return;
-      }
       if (
         event.key === "/" ||
         (event.key === "k" &&
@@ -51,7 +83,7 @@ export function SearchInput({ className }: { className?: string }) {
           (navigator.userAgent.includes("Mac") ? event.metaKey : event.ctrlKey))
       ) {
         event.preventDefault();
-        inputRef.current?.focus();
+        setOpen(true);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
@@ -60,28 +92,23 @@ export function SearchInput({ className }: { className?: string }) {
 
   // Search logic
   const handleSearch = useCallback(async (value: string) => {
+    setSearch(value);
     if (!value) {
       setResults([]);
       setError("");
-      setOpen(false);
       return;
     }
     setIsLoading(true);
     if (!(window as any).pagefind) {
       try {
-        (window as any).pagefind = await import(
-          addBasePath("/_pagefind/pagefind.js")
-        );
-        await (window as any).pagefind.options({ baseUrl: "/" });
+        await importPagefind();
       } catch (err: any) {
         setError(
-          process.env.NODE_ENV !== "production" &&
-            err?.message?.includes("Failed to fetch")
+          process.env.NODE_ENV !== "production"
             ? DEV_SEARCH_NOTICE
             : `${err?.constructor?.name || "Error"}: ${err?.message}`
         );
         setIsLoading(false);
-        setOpen(true);
         return;
       }
     }
@@ -93,80 +120,69 @@ export function SearchInput({ className }: { className?: string }) {
     setResults(
       data.map((newData: PagefindResult) => ({
         ...newData,
+        url: newData.url.replace(/\.html$/, "").replace(/\.html#/, "#"),
         sub_results: newData.sub_results.map((r) => {
           const url = r.url.replace(/\.html$/, "").replace(/\.html#/, "#");
           return { ...r, url };
         }),
       }))
     );
-    setOpen(true);
   }, []);
 
-  // Debounce search
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      handleSearch(search);
-    }, 200);
-    return () => clearTimeout(timeout);
-  }, [search, handleSearch]);
+  // Handle input change
+  const handleInputChange = (value: string) => {
+    handleSearch(value);
+  };
 
-  // Handle result click
+  // Handle selecting a result
   const handleSelect = (url: string) => {
     setOpen(false);
-    setSearch("");
-    if (url.startsWith("#")) {
-      location.href = url;
-    } else {
-      router.push(url);
-    }
+    router.push(url);
   };
 
   return (
-    <div className={cn("w-full my-4", className)}>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Input
-            ref={inputRef}
-            type="search"
-            placeholder="Search documentation…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onFocus={() => search && setOpen(true)}
-            onBlur={() => setTimeout(() => setOpen(false), 150)}
-            autoComplete="off"
-            className="bg-gray-12/50"
-          />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-full max-w-[320px]">
-          {error ? (
-            <DropdownMenuItem disabled>
-              <span className="text-red-500 text-xs">{error}</span>
-            </DropdownMenuItem>
-          ) : isLoading ? (
-            <DropdownMenuItem disabled>
-              <span className="text-xs">Loading…</span>
-            </DropdownMenuItem>
-          ) : results.length ? (
-            results.map((result, i) => (
-              <DropdownMenuItem
-                key={i}
-                onSelect={() => handleSelect(result.url)}
-                className="flex flex-col items-start gap-0.5"
-              >
-                <span className="font-medium text-sm">{result.meta.title}</span>
-                <span className="text-xs text-muted-foreground line-clamp-2">
-                  {result.excerpt}
-                </span>
-              </DropdownMenuItem>
-            ))
-          ) : search ? (
-            <DropdownMenuItem disabled>
-              <span className="text-xs">No results found.</span>
-            </DropdownMenuItem>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <>
+      <Button onClick={() => setOpen(true)} variant={"ghost"}>
+        <span>Search</span>
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-brand-rose-1/10 bg-brand-rose-1/5 px-1.5 font-mono text-[10px] font-medium text-brand-rose-1 opacity-100">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+      </Button>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput
+          placeholder="Type a command or search..."
+          value={search}
+          onValueChange={handleInputChange}
+          ref={inputRef}
+        />
+        <CommandList>
+          {isLoading && <CommandItem disabled>Loading...</CommandItem>}
+          {error && <CommandItem disabled>{error}</CommandItem>}
+          {!isLoading && !error && results.length === 0 && (
+            <CommandEmpty>No results found.</CommandEmpty>
+          )}
+          {!isLoading && !error && results.length > 0 && (
+            <CommandGroup heading="Results">
+              {results.map((result, idx) => (
+                <CommandItem
+                  key={result.url + idx}
+                  onSelect={() => handleSelect(result.url)}
+                  value={result.meta.title}
+                >
+                  <div>
+                    <div className="font-medium">{result.meta.title}</div>
+                    <div
+                      className="text-xs text-muted-foreground line-clamp-2"
+                      dangerouslySetInnerHTML={{ __html: result.excerpt }}
+                    />
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </CommandDialog>
+    </>
   );
 }
 
